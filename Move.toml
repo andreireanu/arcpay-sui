@@ -1,0 +1,6 @@
+[package]
+name = "arcpay"
+edition = "2024"
+
+[dependencies]
+# Sui framework + MoveStdlib are implicit (Sui 1.45+); no entries needed.
