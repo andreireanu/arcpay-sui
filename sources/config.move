@@ -1,15 +1,15 @@
 module arcpay::config;
 
 use arcpay::arcpay::AdminCap;
-use arcpay::constants::{
-    get_VERSION,
-    get_BACKEND_PUBKEY_LENGTH,
-    get_EIncorrectVersion,
-    get_ENotUpgraded,
-    get_EInvalidBackendPubkey,
-};
 use sui::balance::{Self, Balance};
 use sui::sui::SUI;
+
+const VERSION: u64 = 22;
+const BACKEND_PUBKEY_LENGTH: u64 = 32;
+
+const EIncorrectVersion: u64 = 0;
+const ENotUpgraded: u64 = 1;
+const EInvalidBackendPubkey: u64 = 2;
 
 public struct Config has key {
     id: UID,
@@ -23,10 +23,10 @@ public fun initialize_config(
     backend_pubkey: vector<u8>,
     ctx: &mut TxContext,
 ) {
-    assert!(backend_pubkey.length() == get_BACKEND_PUBKEY_LENGTH(), get_EInvalidBackendPubkey());
+    assert!(backend_pubkey.length() == BACKEND_PUBKEY_LENGTH, EInvalidBackendPubkey);
     transfer::share_object(Config {
         id: object::new(ctx),
-        version: get_VERSION(),
+        version: VERSION,
         backend_pubkey,
         fees: balance::zero(),
     });
@@ -34,18 +34,17 @@ public fun initialize_config(
 
 public fun update_backend(config: &mut Config, _admin_cap: &AdminCap, backend_pubkey: vector<u8>) {
     config.assert_version();
-    assert!(backend_pubkey.length() == get_BACKEND_PUBKEY_LENGTH(), get_EInvalidBackendPubkey());
+    assert!(backend_pubkey.length() == BACKEND_PUBKEY_LENGTH, EInvalidBackendPubkey);
     config.backend_pubkey = backend_pubkey;
 }
 
-
 entry fun migrate(config: &mut Config, _admin_cap: &AdminCap) {
-    assert!(config.version < get_VERSION(), get_ENotUpgraded());
-    config.version = get_VERSION();
+    assert!(config.version < VERSION, ENotUpgraded);
+    config.version = VERSION;
 }
 
 public(package) fun assert_version(config: &Config) {
-    assert!(config.version == get_VERSION(), get_EIncorrectVersion());
+    assert!(config.version == VERSION, EIncorrectVersion);
 }
 
 public(package) fun backend_pubkey(config: &Config): &vector<u8> {
