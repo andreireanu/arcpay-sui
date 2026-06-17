@@ -2,7 +2,12 @@ module arcpay::config;
 
 use arcpay::arcpay::AdminCap;
 use sui::balance::{Self, Balance};
+use sui::hash;
 use sui::sui::SUI;
+
+/// Sui signature scheme flag for ed25519, prefixed to the pubkey when deriving
+/// an address.
+const ED25519_FLAG: u8 = 0;
 
 const VERSION: u64 = 22;
 const BACKEND_PUBKEY_LENGTH: u64 = 32;
@@ -49,6 +54,12 @@ public(package) fun assert_version(config: &Config) {
 
 public(package) fun backend_pubkey(config: &Config): &vector<u8> {
     &config.backend_pubkey
+}
+
+public(package) fun backend_address(config: &Config): address {
+    let mut preimage = vector[ED25519_FLAG];
+    preimage.append(config.backend_pubkey);
+    sui::address::from_bytes(hash::blake2b256(&preimage))
 }
 
 public(package) fun fees_join(config: &mut Config, b: Balance<SUI>) {

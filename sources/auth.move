@@ -36,6 +36,31 @@ public(package) fun verify_buy(
     );
 }
 
+/// Signed message layout (56 bytes), little-endian:
+///   [0..32] seller | [32..48] offer_id | [48..56] expiry_ms
+///
+/// Shared by seller accept and seller cancel — the backend attests the offer
+/// belongs to the seller.
+public(package) fun verify_seller_auth(
+    backend_pubkey: &vector<u8>,
+    signature: &vector<u8>,
+    seller: address,
+    offer_id: vector<u8>,
+    expiry_ms: u64,
+    clock: &Clock,
+) {
+    assert!(clock.timestamp_ms() < expiry_ms, EAuthorizationExpired);
+
+    let mut msg = sui::address::to_bytes(seller);
+    msg.append(offer_id);
+    msg.append(bcs::to_bytes(&expiry_ms));
+
+    assert!(
+        ed25519::ed25519_verify(signature, backend_pubkey, &msg),
+        EInvalidAuthorizationSignature,
+    );
+}
+
 /// Signed message layout (96 bytes), little-endian:
 ///   [0..32] buyer | [32..64] seller | [64..80] uuid
 ///   [80..88] amount | [88..96] expiry_ms
