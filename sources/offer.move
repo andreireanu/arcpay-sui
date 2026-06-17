@@ -117,7 +117,13 @@ public fun offer(
 
 public fun buyer_cancel_offer(offer: Offer, clock: &Clock, ctx: &mut TxContext) {
     assert!(ctx.sender() == offer.buyer, EUnauthorized);
-    let (offer_id, uuid, buyer, seller, amount) = delete_offer(offer, ctx);
+
+    let offer_id = object::id(&offer);
+    let Offer { id, uuid, buyer, seller, escrow } = offer;
+    let amount = escrow.value();
+
+    transfer::public_transfer(escrow.into_coin(ctx), buyer);
+    id.delete();
 
     event::emit(BuyerOfferCanceled {
         offer_id,
@@ -195,15 +201,4 @@ public fun admin_settle_offer(
     };
 
     id.delete();
-}
-
-fun delete_offer(offer: Offer, ctx: &mut TxContext): (ID, vector<u8>, address, address, u64) {
-    let offer_id = object::id(&offer);
-    let Offer { id, uuid, buyer, seller, escrow } = offer;
-    let amount = escrow.value();
-
-    transfer::public_transfer(escrow.into_coin(ctx), buyer);
-    id.delete();
-
-    (offer_id, uuid, buyer, seller, amount)
 }
