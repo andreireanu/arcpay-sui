@@ -320,6 +320,33 @@ fun test_buy_expired_fails() {
     sc.end();
 }
 
+#[test]
+fun test_withdraw_commission() {
+    let mut sc = setup();
+    let clock = clock::create_for_testing(sc.ctx());
+    // Accrue a fee into config.fees via a buy-with-fee.
+    sc.next_tx(BUYER);
+    {
+        let mut cfg = sc.take_shared<Config>();
+        let payment = coin::mint_for_testing<SUI>(SELLER_AMOUNT + FEE, sc.ctx());
+        buy::buy(&mut cfg, payment, SELLER, SELLER_AMOUNT, FEE, UUID, EXPIRY, BUY_SIG, &clock, sc.ctx());
+        ts::return_shared(cfg);
+    };
+    // Admin withdraws the whole fee balance.
+    sc.next_tx(ADMIN);
+    {
+        let mut cfg = sc.take_shared<Config>();
+        let cap = sc.take_from_sender<AdminCap>();
+        let proceeds = config::withdraw_commission(&mut cfg, &cap, sc.ctx());
+        assert!(proceeds.value() == FEE, 0);
+        transfer::public_transfer(proceeds, ADMIN);
+        sc.return_to_sender(cap);
+        ts::return_shared(cfg);
+    };
+    clock.destroy_for_testing();
+    sc.end();
+}
+
 // === admin settle ===
 
 #[test]
