@@ -2,6 +2,7 @@ module arcpay::config;
 
 use arcpay::arcpay::AdminCap;
 use sui::balance::{Self, Balance};
+use sui::coin::Coin;
 use sui::hash;
 use sui::sui::SUI;
 
@@ -64,4 +65,12 @@ public(package) fun backend_address(config: &Config): address {
 
 public(package) fun fees_join(config: &mut Config, b: Balance<SUI>) {
     config.fees.join(b);
+}
+
+public fun withdraw_commission(
+    config: &mut Config,
+    _admin_cap: &AdminCap,
+    ctx: &mut TxContext,
+): Coin<SUI> {
+    config.fees.withdraw_all().into_coin(ctx)
 }
