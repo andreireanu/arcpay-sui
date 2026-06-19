@@ -1,4 +1,4 @@
-# ArcPay — Sui Move Contracts
+# ArcPay - Sui Move Contracts
 
 Backend-authorized payments and escrow for a peer-to-peer marketplace.
 ArcPay settles trades in SUI on-chain while an off-chain backend orchestrates the
@@ -14,7 +14,7 @@ funds only move for orders the backend actually approved.
   the backend can never be impersonated and the chain never moves funds for an
   unapproved order.
 - **Capability-based admin.** Privileged configuration is gated by an `AdminCap`
-  object rather than a hardcoded address — composable and testable.
+  object rather than a hardcoded address - composable and testable.
 - **Two settlement paths.** A single-transaction *instant buy* and a deferred
   *escrowed offer* flow, covering both "buy now" and "make an offer" UX.
 
@@ -23,7 +23,7 @@ funds only move for orders the backend actually approved.
 | Module | Responsibility |
 |--------|----------------|
 | `arcpay` | Package init: claims the `Publisher` and mints the `AdminCap` to the deployer. |
-| `config` | Shared `Config` singleton — backend public key, version gate, and accrued fee balance. Admin-gated setters and fee withdrawal. |
+| `config` | Shared `Config` singleton - backend public key, version gate, and accrued fee balance. Admin-gated setters and fee withdrawal. |
 | `auth`   | Verifies the backend's ed25519 signatures over the canonical order byte layouts. Package-internal. |
 | `buy`    | Instant buy: pays the seller and retains the protocol fee in one transaction. |
 | `offer`  | Escrowed offer lifecycle: buyer escrow, buyer/seller signals, and backend settlement. |
@@ -39,22 +39,22 @@ funds only move for orders the backend actually approved.
 ### Escrowed offer (`offer`)
 The word "offer" spans two distinct things, in flow order:
 
-- **Seller offer (off-chain):** the seller's own listing — the first step in the
+- **Seller offer (off-chain):** the seller's own listing - the first step in the
   flow. It has no on-chain object and is referenced only by its `offer_id`.
 - **Buyer offer (on-chain escrow):** the `Offer` object a buyer creates via
   `offer::offer` in response, locking funds. (In product terms, a *counteroffer*.)
-  It carries its **own** id, independent of the seller offer's `offer_id` — the
+  It carries its **own** id, independent of the seller offer's `offer_id` - the
   two are never linked on-chain. Only the backend database knows which buyer
   offer answers which seller offer, so buyer offers stay anonymous on-chain.
 
 Lifecycle:
-1. **List** — the seller publishes a seller offer off-chain (no on-chain action).
-2. **Escrow** — a buyer responds by creating a buyer offer, locking funds in a
+1. **List** - the seller publishes a seller offer off-chain (no on-chain action).
+2. **Escrow** - a buyer responds by creating a buyer offer, locking funds in a
    shared `Offer` (`offer::offer`).
-3. **Signal** — the seller accepts or withdraws their seller offer
+3. **Signal** - the seller accepts or withdraws their seller offer
    (`seller_accept_offer` / `seller_cancel_offer`). These emit events only; no
    funds move.
-4. **Resolve** — either the buyer reclaims their escrow (`buyer_cancel_offer`),
+4. **Resolve** - either the buyer reclaims their escrow (`buyer_cancel_offer`),
    or the backend settles (`admin_settle_offer`), paying the seller minus fee
    (`OfferBought`) or refunding the buyer (`OfferRefunded`).
 
@@ -62,7 +62,7 @@ Acceptance and settlement are deliberately separate: a seller's acceptance is a
 consent signal, while the backend's settlement is the authoritative movement of
 funds.
 
-A settlement to the seller can be triggered two ways — a seller manually
+A settlement to the seller can be triggered two ways - a seller manually
 accepting, or the backend's auto-accept rule firing. Both run through
 `admin_settle_offer` and emit `OfferBought`, so the event carries an `auto`
 boolean (`true` = auto-accept rule, `false` = manual accept) to let the
