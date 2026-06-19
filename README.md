@@ -1,8 +1,6 @@
 # ArcPay — Sui Move Contracts
 
-Backend-authorized payments and escrow for a peer-to-peer marketplace, built for
-the **Sui Overflow 2026 — DeFi & Payments** track.
-
+Backend-authorized payments and escrow for a peer-to-peer marketplace.
 ArcPay settles trades in SUI on-chain while an off-chain backend orchestrates the
 order book. Every privileged action carries an **ed25519 signature from the
 backend**, which the contract verifies on-chain. This keeps order matching,
