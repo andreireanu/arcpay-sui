@@ -359,7 +359,7 @@ fun test_admin_settle_to_seller_with_fee() {
     {
         let mut cfg = sc.take_shared<Config>();
         let off = sc.take_shared<Offer>();
-        offer::admin_settle_offer(&mut cfg, off, true, FEE, &clock, sc.ctx());
+        offer::admin_settle_offer(&mut cfg, off, true, FEE, true, &clock, sc.ctx());
         ts::return_shared(cfg);
     };
     assert_received(&mut sc, SELLER, AMOUNT - FEE);
@@ -378,7 +378,7 @@ fun test_admin_settle_to_seller_no_fee() {
     {
         let mut cfg = sc.take_shared<Config>();
         let off = sc.take_shared<Offer>();
-        offer::admin_settle_offer(&mut cfg, off, true, 0, &clock, sc.ctx());
+        offer::admin_settle_offer(&mut cfg, off, true, 0, false, &clock, sc.ctx());
         ts::return_shared(cfg);
     };
     assert_received(&mut sc, SELLER, AMOUNT);
@@ -397,7 +397,7 @@ fun test_admin_settle_refund() {
     {
         let mut cfg = sc.take_shared<Config>();
         let off = sc.take_shared<Offer>();
-        offer::admin_settle_offer(&mut cfg, off, false, 0, &clock, sc.ctx());
+        offer::admin_settle_offer(&mut cfg, off, false, 0, false, &clock, sc.ctx());
         ts::return_shared(cfg);
     };
     assert_received(&mut sc, BUYER, AMOUNT);
@@ -416,7 +416,7 @@ fun test_admin_settle_refund_with_fee_fails() {
     sc.next_tx(BACKEND);
     let mut cfg = sc.take_shared<Config>();
     let off = sc.take_shared<Offer>();
-    offer::admin_settle_offer(&mut cfg, off, false, FEE, &clock, sc.ctx());
+    offer::admin_settle_offer(&mut cfg, off, false, FEE, false, &clock, sc.ctx());
     ts::return_shared(cfg);
 
     clock.destroy_for_testing();
@@ -433,7 +433,7 @@ fun test_admin_settle_fee_exceeds_amount_fails() {
     sc.next_tx(BACKEND);
     let mut cfg = sc.take_shared<Config>();
     let off = sc.take_shared<Offer>();
-    offer::admin_settle_offer(&mut cfg, off, true, AMOUNT + 1, &clock, sc.ctx());
+    offer::admin_settle_offer(&mut cfg, off, true, AMOUNT + 1, false, &clock, sc.ctx());
     ts::return_shared(cfg);
 
     clock.destroy_for_testing();
@@ -450,7 +450,7 @@ fun test_admin_settle_wrong_caller_fails() {
     sc.next_tx(BUYER);
     let mut cfg = sc.take_shared<Config>();
     let off = sc.take_shared<Offer>();
-    offer::admin_settle_offer(&mut cfg, off, true, FEE, &clock, sc.ctx());
+    offer::admin_settle_offer(&mut cfg, off, true, FEE, false, &clock, sc.ctx());
     ts::return_shared(cfg);
 
     clock.destroy_for_testing();

@@ -64,6 +64,12 @@ Acceptance and settlement are deliberately separate: a seller's acceptance is a
 consent signal, while the backend's settlement is the authoritative movement of
 funds.
 
+A settlement to the seller can be triggered two ways — a seller manually
+accepting, or the backend's auto-accept rule firing. Both run through
+`admin_settle_offer` and emit `OfferBought`, so the event carries an `auto`
+boolean (`true` = auto-accept rule, `false` = manual accept) to let the
+indexer/webhook tell them apart.
+
 ## Authorization model
 
 The backend holds an ed25519 keypair; its public key is stored in `Config`. For

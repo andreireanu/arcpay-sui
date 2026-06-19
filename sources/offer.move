@@ -92,6 +92,9 @@ public struct OfferAccepted has copy, drop {
 }
 
 /// Backend settlement of an accepted offer: escrow (minus fee) paid to the seller.
+///
+/// `auto` distinguishes how the settlement was triggered: `true` when the
+/// backend's auto-accept rule fired, `false` when a seller manually accepted.
 public struct OfferBought has copy, drop {
     offer_id: ID,
     uuid: vector<u8>,
@@ -99,6 +102,7 @@ public struct OfferBought has copy, drop {
     seller: address,
     seller_amount: u64,
     fee_amount: u64,
+    auto: bool,
     timestamp: u64,
 }
 
@@ -289,6 +293,9 @@ public fun seller_accept_offer(
 /// - offer: the offer to settle (consumed)
 /// - to_seller: true to pay the seller, false to refund the buyer
 /// - fee_amount: protocol fee to retain (only when paying the seller)
+/// - auto: true if the backend's auto-accept rule triggered this settlement,
+///   false if a seller manually accepted. Recorded on `OfferBought`; does not
+///   affect control flow.
 /// - clock: the shared clock, used for event timestamps
 /// - ctx: transaction context
 ///
@@ -301,6 +308,7 @@ public fun admin_settle_offer(
     offer: Offer,
     to_seller: bool,
     fee_amount: u64,
+    auto: bool,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
@@ -325,6 +333,7 @@ public fun admin_settle_offer(
             seller,
             seller_amount,
             fee_amount,
+            auto,
             timestamp,
         });
     } else {
