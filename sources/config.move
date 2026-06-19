@@ -20,7 +20,7 @@ const ED25519_FLAG: u8 = 0;
 
 /// Current on-chain version. Entry points assert against this so that a stale
 /// `Config` (one not yet migrated after a package upgrade) is rejected.
-const VERSION: u64 = 22;
+const VERSION: u64 = 1;
 /// Expected length, in bytes, of a raw ed25519 public key.
 const BACKEND_PUBKEY_LENGTH: u64 = 32;
 
